@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function get_storage() {
     chrome.storage.sync.get(default_data, function(items){
         saved_data = items
-        // go();
         window.setTimeout(function(){
             go();    
         }, 400);    
@@ -50,7 +49,7 @@ function add_to_field(fld) {
     field_text = (fld.text().indexOf(':') > -1)
         // grab last item via reverse->first item
         ? fld.text().split(" ").reverse()[0] 
-        : fld.text()
+        : fld.text().split(" ")[0]
 
     if (field_text.indexOf("-") == 0 || field_text.trim().length == 0)
         return
@@ -99,11 +98,19 @@ function get_ssh_user() {
     if (saved_data['always_override_user'])
         user = default_user
 
-    return user + "@"
+    if (user.length)
+        return user + "@"
+    else
+        return ""
 }
 
 function get_windows_user() {
-    return saved_data['rdp_user'] + "@"
+    user = saved_data['rdp_user']
+
+    if (user.length)
+        return user + "@"
+    else
+        return ""
 }
 
 function get_selector(row,div) {
