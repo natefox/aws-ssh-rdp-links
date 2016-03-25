@@ -4,15 +4,14 @@ chrome.storage.onChanged.addListener(function(){
     get_storage();
 })
 
+// I really want something like this!
+// http://stackoverflow.com/a/3597640/517606
 document.addEventListener('DOMContentLoaded', function() {
     $(document).click(function(){
         if (window.location.hash.startsWith("#Instances"))
             get_storage();
     })
 });
-
-// I really want something like this!
-// http://stackoverflow.com/a/3597640/517606
 
 
 function get_storage() {
