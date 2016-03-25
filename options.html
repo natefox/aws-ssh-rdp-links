@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <script src="jquery-2.2.2.min.js"></script>
+  <script src="defaults.js"></script>
+  <script src="options.js"></script>
+
   <title>AWS SSH RDP Options</title>
   <style>
     body { padding: 10px; min-width: 200px; }
@@ -13,6 +17,13 @@
   <div>
     RDP User<br>
     <input type="input" id="rdp_user" value="Administrator">
+  </div>
+  <div>
+    RDP Link Style<br>
+    <select id="rdp_style">
+      <option value="MS">Microsoft</option>
+      <option value="CoRD">CoRD</option>
+    </select>
   </div>
 
   <div>
@@ -30,8 +41,9 @@
     <button id="save">Save</button>
   </div>
 
-  <script src="jquery-2.2.2.min.js"></script>
-  <script src="defaults.js"></script>
-  <script src="options.js"></script>
+  <div>
+    <a href="https://github.com/natefox/aws-ssh-rdp-links">Website</a> | 
+    <a href="https://github.com/natefox/aws-ssh-rdp-links/issues">Report a bug?</a>
+  </div>
 </body>
 </html>

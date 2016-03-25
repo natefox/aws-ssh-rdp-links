@@ -42,14 +42,14 @@ function go() {
 
     add_to_field(private_dns)
     add_to_field(public_dns)
-    add_to_field(top_row)
+    add_to_field(top_row, true)
 }
 
-function add_to_field(fld) {
-    field_text = (fld.text().indexOf(':') > -1)
+function add_to_field(fld, is_top_row = false) {
+    field_text = (is_top_row)
         // grab last item via reverse->first item
-        ? fld.text().split(" ").reverse()[0] 
-        : fld.text().split(" ")[0]
+        ? fld.contents().first().text().split(" ").reverse()[0]
+        : fld.contents().first().text()
 
     if (field_text.indexOf("-") == 0 || field_text.trim().length == 0)
         return
@@ -62,21 +62,33 @@ function add_to_field(fld) {
 
     str_to_add = (platform == "windows")
                 ? create_rdp(field_text) 
-                : create_ssh(field_text);
+                : create_ssh(field_text)
 
     span.append(str_to_add)
     fld.append(span)
 }
 
 function create_ssh(host) {
-    user = get_ssh_user();
+    user = get_ssh_user()
     href = $("<a />", {href: "ssh://"+user+host , text: "SSH"})
     return href
 }
 
 function create_rdp(host) {
-    user = get_windows_user();
-    href = $("<a />", {href: "rdp://"+user+host , text: "RDP"})
+    user = get_windows_user()
+
+    if (saved_data['rdp_style'] == "MS") {
+        query_string_opts = []
+        if (user.length > 0) query_string_opts.push("username=s:"+user)
+        query_string_opts.push("full%20address=s:"+host+":3389")
+
+        query_string = query_string_opts.join("&")
+        href = $("<a />", {href: "rdp://"+query_string, text: "RDP"})
+    } else if (saved_data['rdp_style'] == "CoRD") {
+        user_at = (user.length > 0) ? user+"@" : ""
+        href = $("<a />", {href: "rdp://"+user_at+host , text: "RDP"})
+    }
+
     return href
 }
 
@@ -106,11 +118,7 @@ function get_ssh_user() {
 
 function get_windows_user() {
     user = saved_data['rdp_user']
-
-    if (user.length)
-        return user + "@"
-    else
-        return ""
+    return user
 }
 
 function get_selector(row,div) {
