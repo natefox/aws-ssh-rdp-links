@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.5 - 2016-06-16
+- Updated for changes in AWS' CSS classes
+
 ## 0.1.3 - 2016-03-25
 - Cleaned up internals a bit, moved old code to jquery
 - Updated documentation a bit
