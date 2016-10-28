@@ -121,5 +121,5 @@ function get_windows_user() {
 }
 
 function get_selector(row,div) {
-    return $("table.PJ > tbody tr:eq("+row+") div.BK:eq("+div+")")
+    return $("table.AK > tbody tr:eq("+row+") div.CK:eq("+div+")")
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7 - 2016-10-28
+- Updated for changes in AWS' CSS classes (again)
+
+## 0.1.6 - 2016-10-28
+- apparently I forgot to update for 0.1.6!
+
 ## 0.1.5 - 2016-06-16
 - Updated for changes in AWS' CSS classes
 
