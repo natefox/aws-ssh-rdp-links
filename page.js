@@ -24,13 +24,18 @@ function get_storage() {
 }
 
 function go() {
-    private_dns = get_selector(4,0);
-    private_ip = get_selector(5,0);
+    // private_dns = get_selector(4,0);
+    private_dns = find_value("Private DNS");
+    // private_ip = get_selector(5,0);
+    private_ip = find_value("Private IPs");
 
-    public_dns = get_selector(1,1);
-    public_ip = get_selector(2,1);
-
-    elastic_ip = get_selector(3,1);
+    // public_dns = get_selector(1,1);
+    public_dns = find_value("Public DNS");
+    // public_ip = get_selector(2,1);
+    public_ip = find_value("Public IP");
+    
+    // elastic_ip = get_selector(3,1);
+    elastic_ip = find_value("Elastic IP");
 
     top_row = $("div.GMB span:eq(2)")
 
@@ -45,26 +50,33 @@ function go() {
 }
 
 function add_to_field(fld, is_top_row = false) {
-    field_text = (is_top_row)
-        // grab last item via reverse->first item
-        ? fld.contents().first().text().split(" ").reverse()[0]
-        : fld.contents().first().text()
+    var field_text_arr = (is_top_row)
+                            // grab last item via reverse->first item
+                            ? fld.contents().first().text().split(" ").reverse()
+                            : fld.contents().first().text().split(",")
 
-    if (field_text.indexOf("-") == 0 || field_text.trim().length == 0)
+    if (field_text_arr[0].indexOf("-") == 0 || field_text_arr[0].trim().length == 0)
         return
 
-    span = ($("span.awssshrdplink", fld).length)
+    // platform = get_selector(8,1).text();
+    platform = find_value("Platform").text();
+
+    field_text_arr.forEach(function(e,i,a){
+        console.log(e,i,a)
+        console.log(fld)
+        var span = ($("span.awssshrdplink", fld).length)
             ? $("span.awssshrdplink", fld).empty()
             : $("<span />", {class: "awssshrdplink"})
     
-    platform = get_selector(8,1).text();
+        field_text=e.trim()
+        var str_to_add = (platform == "windows")
+                       ? create_rdp(field_text) 
+                       : create_ssh(field_text)
 
-    str_to_add = (platform == "windows")
-                ? create_rdp(field_text) 
-                : create_ssh(field_text)
+        span.append(str_to_add)
+        fld.append(span)
+    })
 
-    span.append(str_to_add)
-    fld.append(span)
 }
 
 function create_ssh(host) {
@@ -122,4 +134,10 @@ function get_windows_user() {
 
 function get_selector(row,div) {
     return $("table.PJ > tbody tr:eq("+row+") div.BK:eq("+div+")")
+}
+
+function find_value(plaintext) {
+    // $context=$("div:contains("+plaintext+")").not(["__gwt_header_row"],["__gwt_header"]).last().parent()
+    $context=$("span:contains("+plaintext+")").closest("td")
+    return $("div > div:eq(2)", $context)
 }
