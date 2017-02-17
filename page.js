@@ -107,7 +107,7 @@ function create_rdp(host) {
 function get_ssh_user() {
     default_user = saved_data['ssh_user']
 
-    ami = get_selector(7,1).text();
+    ami = get_selector(8,0).text();
     if (ami.indexOf("ubuntu") > -1)
         user = "ubuntu"
     else if (ami.indexOf("amzn") > -1)
