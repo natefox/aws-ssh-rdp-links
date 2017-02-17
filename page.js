@@ -50,6 +50,11 @@ function add_to_field(fld, is_top_row = false) {
         ? fld.contents().first().text().split(" ").reverse()[0]
         : fld.contents().first().text()
 
+    // remove * from EIP
+    if (field_text.endsWith("*")) {
+      field_text = field_text.substr(0, field_text.length-1);
+    }
+
     if (field_text.indexOf("-") == 0 || field_text.trim().length == 0)
         return
 
