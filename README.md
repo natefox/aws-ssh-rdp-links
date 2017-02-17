@@ -10,3 +10,6 @@ Otherwise, it adds SSH links to all the fields.
 - **MS** uses a link like rdp://full%20address=s:HOST:3389&username=s:USER - this works for the Microsoft RDP clients. Full documentation is here: https://technet.microsoft.com/en-us/library/dn690096.aspx
 - **CoRD** uses a link like rdp://USER@HOST - and is good for OSX's CoRD. Full documentation here: https://github.com/dorianj/CoRD/wiki/Command-Line-Use
 
+
+### Thanks to
+- stefansundin for rewriting a bunch of stuff when I didnt have time
