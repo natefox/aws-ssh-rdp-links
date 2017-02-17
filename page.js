@@ -7,6 +7,7 @@ chrome.storage.onChanged.addListener(function(){
 // I really want something like this!
 // http://stackoverflow.com/a/3597640/517606
 document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(get_storage, 4000);
     $(document).click(function(){
         if (window.location.hash.startsWith("#Instances"))
             get_storage();
