@@ -70,7 +70,7 @@ function add_to_field(fld, is_top_row = false) {
             ? $("span.awssshrdplink", fld).empty()
             : $("<span />", {class: "awssshrdplink"})
 
-    platform = get_selector(8,1).text();
+    platform = get_selector(9,0).text();
 
     str_to_add = (platform == "windows")
                 ? create_rdp(field_text)
