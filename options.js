@@ -1,3 +1,10 @@
+var default_data = {
+  always_override_user: false,
+  rdp_style: "MS",
+  rdp_user: "Administrator",
+  ssh_user: "ec2-user"
+}
+
 // Saves options to chrome.storage.sync.
 function save_options() {
   var always_override_user = $("#always_override_user").is(":checked");
@@ -31,4 +38,3 @@ $( document ).ready(function() {
   load_options();
   $("#save").click(save_options);
 });
-

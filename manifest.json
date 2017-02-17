@@ -10,7 +10,6 @@
         "https://console.aws.amazon.com/ecs/v2/*"
       ],
       "js": [
-        "defaults.js",
         "page.js",
         "jquery-2.2.2.min.js"
       ],
