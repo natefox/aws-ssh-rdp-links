@@ -120,5 +120,5 @@ function get_windows_user() {
 }
 
 function get_selector(row,div) {
-    return $(".gwt-TabLayoutPanelContent table > tbody tr:eq("+row+") div.LJ:eq("+div+")")
+    return $(`.gwt-TabLayoutPanelContent table > tbody tr:eq(${row}) div > div > div:eq(${div*2+1})`)
 }
