@@ -31,13 +31,15 @@ function go() {
     public_dns = get_selector(1,1);
     public_ip = get_selector(2,1);
 
-    elastic_ip = get_selector(4,0);
+    elastic_ips = get_selector(4,0);
+    elastic_ips.find("li").each(function(i, eip) {
+      add_to_field($(eip))
+    });
 
     top_row = $("div.HOB span:eq(2)")
 
     add_to_field(private_ip)
     add_to_field(public_ip)
-    add_to_field(elastic_ip)
 
     add_to_field(private_dns)
     add_to_field(public_dns)
