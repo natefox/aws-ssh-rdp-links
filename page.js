@@ -18,22 +18,21 @@ function get_storage() {
     chrome.storage.sync.get(default_data, function(items){
         saved_data = items
         window.setTimeout(function(){
-            go();    
-        }, 400);    
+            go();
+        }, 400);
     })
 }
 
 function go() {
-    private_dns = get_selector(4,0);
-    private_ip = get_selector(5,0);
+    private_dns = get_selector(4,1);
+    private_ip = get_selector(5,1);
 
     public_dns = get_selector(1,1);
     public_ip = get_selector(2,1);
 
-    elastic_ip = get_selector(3,1);
+    elastic_ip = get_selector(4,0);
 
-    top_row = $("div.GMB span:eq(2)")
-
+    top_row = $("div.HOB span:eq(2)")
 
     add_to_field(private_ip)
     add_to_field(public_ip)
@@ -56,11 +55,11 @@ function add_to_field(fld, is_top_row = false) {
     span = ($("span.awssshrdplink", fld).length)
             ? $("span.awssshrdplink", fld).empty()
             : $("<span />", {class: "awssshrdplink"})
-    
+
     platform = get_selector(8,1).text();
 
     str_to_add = (platform == "windows")
-                ? create_rdp(field_text) 
+                ? create_rdp(field_text)
                 : create_ssh(field_text)
 
     span.append(str_to_add)
@@ -95,7 +94,7 @@ function get_ssh_user() {
     default_user = saved_data['ssh_user']
 
     ami = get_selector(7,1).text();
-    if (ami.indexOf("ubuntu") > -1) 
+    if (ami.indexOf("ubuntu") > -1)
         user = "ubuntu"
     else if (ami.indexOf("amzn") > -1)
         user = "ec2-user"
@@ -103,7 +102,7 @@ function get_ssh_user() {
         user = "ec2-user"
     else if (ami.indexOf("suse-sles") > -1)
         user = "ec2-user"
-    else 
+    else
         user = default_user
 
     if (saved_data['always_override_user'])
@@ -121,5 +120,5 @@ function get_windows_user() {
 }
 
 function get_selector(row,div) {
-    return $("table.AK > tbody tr:eq("+row+") div.CK:eq("+div+")")
+    return $(".gwt-TabLayoutPanelContent table > tbody tr:eq("+row+") div.LJ:eq("+div+")")
 }
