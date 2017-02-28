@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "AWS SSH RDP Links",
   "description": "Adds SSH and RDP links to the AWS Console",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "content_scripts": [
     {
       "matches": [
