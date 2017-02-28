@@ -15,13 +15,13 @@ chrome.storage.onChanged.addListener(function(){
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(get_storage, 4000);
     $(document).click(function(){
-        if (window.location.hash.startsWith("#Instances"))
-            get_storage();
+        get_storage();
     })
 });
 
 
 function get_storage() {
+    if (!window.location.hash.startsWith("#Instances")) return;
     chrome.storage.sync.get(default_data, function(items){
         saved_data = items
         window.setTimeout(function(){
