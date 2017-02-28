@@ -1,4 +1,9 @@
 # Changelog
+## 0.1.9 - 2017-02-28
+- Fix bug where SSH links are added to the wrong console (#5) (stefansundin)
+
+## 0.1.8 - 2016-02-17
+- Updated for changes in AWS' entire console layout (stefansundin)
 
 ## 0.1.7 - 2016-10-28
 - Updated for changes in AWS' CSS classes (again)
