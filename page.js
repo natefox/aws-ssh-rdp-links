@@ -37,6 +37,8 @@ function go() {
     public_dns = get_selector(1,1);
     public_ip = get_selector(2,1);
 
+    ipv6_ip = get_selector(3,1);
+
     elastic_ips = get_selector(4,0);
     elastic_ips.find("li").each(function(i, eip) {
       add_to_field($(eip))
@@ -47,12 +49,19 @@ function go() {
     add_to_field(private_ip)
     add_to_field(public_ip)
 
+    add_to_field(ipv6_ip)
+
     add_to_field(private_dns)
     add_to_field(public_dns)
     add_to_field(top_row, true)
 }
 
 function add_to_field(fld, is_top_row = false) {
+    if (fld.find("a").length > 0) {
+      // e.g. IPv6 with more than one address, then it's a link saying just "2 IPs" (with a popup that shows the IPs on mouseover)
+      return
+    }
+
     field_text = (is_top_row)
         // grab last item via reverse->first item
         ? fld.contents().first().text().split(" ").reverse()[0]
@@ -61,6 +70,11 @@ function add_to_field(fld, is_top_row = false) {
     // remove * from EIP
     if (field_text.endsWith("*")) {
       field_text = field_text.substr(0, field_text.length-1);
+    }
+
+    // put IPv6 inside []
+    if (field_text.indexOf(":") != -1) {
+      field_text = `[${field_text}]`;
     }
 
     if (field_text.indexOf("-") == 0 || field_text.trim().length == 0)
