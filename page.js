@@ -73,8 +73,8 @@ function add_to_field(fld, is_top_row = false) {
       field_text = field_text.substr(0, field_text.length-1);
     }
 
-    // put IPv6 inside [] if options warrant it
-    if (saved_data['ipv6_brackets'] && field_text.indexOf(":") != -1) {
+    // put IPv6 inside []
+    if (field_text.indexOf(":") != -1) {
       field_text = `[${field_text}]`;
     }
 

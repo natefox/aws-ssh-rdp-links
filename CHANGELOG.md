@@ -1,4 +1,7 @@
 # Changelog
+## 0.1.11 - 2017-09-24
+- Force IPv6 address into brackets
+
 ## 0.1.10 - 2017-09-24
 - Add IPv6 (#6) (stefansundin)
 - Add option for IPv6 addresses to use brackets or not
