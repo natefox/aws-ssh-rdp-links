@@ -1,4 +1,9 @@
 # Changelog
+## 0.1.10 - 2017-09-24
+- Add IPv6 (#6) (stefansundin)
+- Add option for IPv6 addresses to use brackets or not
+- Removed save button - any changes are saved on the fly
+
 ## 0.1.9 - 2017-02-28
 - Fix bug where SSH links are added to the wrong console (#5) (stefansundin)
 
