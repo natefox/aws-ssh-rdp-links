@@ -1,7 +1,6 @@
 var saved_data = {}
 var default_data = {
   always_override_user: false,
-  ipv6_brackets: false,
   rdp_style: "MS",
   rdp_user: "Administrator",
   ssh_user: "ec2-user"
