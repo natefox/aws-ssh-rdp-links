@@ -1,34 +1,33 @@
-var saved_data = {}
-var default_data = {
+var default_options = {
+  ssh_user: "ec2-user",
   always_override_user: false,
-  rdp_style: "MS",
   rdp_user: "Administrator",
-  ssh_user: "ec2-user"
+  rdp_style: "MS",
 }
 
-chrome.storage.onChanged.addListener(function(){
-  get_storage();
-})
+var options = {}
+function get_options() {
+  if (!window.location.hash.startsWith("#Instances")) return;
+  chrome.storage.sync.get(default_options, function(items){
+    options = items
+    window.setTimeout(function(){
+      go()
+    }, 400)
+  })
+}
+
+get_options()
+chrome.storage.onChanged.addListener(get_options)
 
 // I really want something like this!
 // http://stackoverflow.com/a/3597640/517606
 document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(get_storage, 4000);
+  setTimeout(get_options, 4000);
   $(document).click(function(){
-    get_storage();
+    go()
   })
 });
 
-
-function get_storage() {
-  if (!window.location.hash.startsWith("#Instances")) return;
-  chrome.storage.sync.get(default_data, function(items){
-    saved_data = items
-    window.setTimeout(function(){
-      go();
-    }, 400);
-  })
-}
 
 function go() {
   private_dns = get_selector(4,1);
@@ -103,7 +102,7 @@ function create_ssh(host) {
 function create_rdp(host) {
   user = get_windows_user()
 
-  if (saved_data['rdp_style'] == "MS") {
+  if (options['rdp_style'] == "MS") {
     query_string_opts = []
     if (user.length > 0) query_string_opts.push("username=s:"+user)
     query_string_opts.push("full%20address=s:"+host+":3389")
@@ -111,7 +110,7 @@ function create_rdp(host) {
     query_string = query_string_opts.join("&")
     href = $("<a />", {href: "rdp://"+query_string, text: "RDP"})
   }
-  else if (saved_data['rdp_style'] == "CoRD") {
+  else if (options['rdp_style'] == "CoRD") {
     user_at = (user.length > 0) ? user+"@" : ""
     href = $("<a />", {href: "rdp://"+user_at+host , text: "RDP"})
   }
@@ -120,7 +119,7 @@ function create_rdp(host) {
 }
 
 function get_ssh_user() {
-  default_user = saved_data['ssh_user']
+  default_user = options['ssh_user']
 
   ami = get_selector(8,0).text();
   if (ami.indexOf("ubuntu") > -1)
@@ -134,7 +133,7 @@ function get_ssh_user() {
   else
     user = default_user
 
-  if (saved_data['always_override_user'])
+  if (options['always_override_user'])
     user = default_user
 
   if (user.length)
@@ -144,7 +143,7 @@ function get_ssh_user() {
 }
 
 function get_windows_user() {
-  user = saved_data['rdp_user']
+  user = options['rdp_user']
   return user
 }
 
