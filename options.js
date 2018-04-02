@@ -34,7 +34,7 @@ function load_options() {
   });
 }
 
-$( document ).ready(function() {
+$(document).ready(function() {
   load_options();
   $("input[type=checkbox]").click(save_options);
   $("input[type=select]").change(save_options);
