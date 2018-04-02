@@ -94,8 +94,11 @@ function add_to_field(fld, is_top_row = false) {
 }
 
 function create_ssh(host) {
-  user = get_ssh_user()
-  href = $("<a />", {href: "ssh://"+user+host , text: "SSH"})
+  var user = get_ssh_user()
+  href = $("<a />", {
+    href: "ssh://"+(user?`${user}@`:"")+host,
+    text: "SSH",
+  })
   return href
 }
 
@@ -119,27 +122,26 @@ function create_rdp(host) {
 }
 
 function get_ssh_user() {
-  default_user = options['ssh_user']
+  if (options["always_override_user"])
+    return options["ssh_user"]
 
-  ami = get_selector(8,0).text();
+  var ami = get_selector(8,0).text()
+  if (!ami)
+    return options["ssh_user"]
+
+  ami = ami.textContent
   if (ami.indexOf("ubuntu") > -1)
-    user = "ubuntu"
+    return "ubuntu"
   else if (ami.indexOf("amzn") > -1)
-    user = "ec2-user"
+    return "ec2-user"
   else if (ami.indexOf("RHEL") > -1)
-    user = "ec2-user"
+    return "ec2-user"
   else if (ami.indexOf("suse-sles") > -1)
-    user = "ec2-user"
-  else
-    user = default_user
+    return "ec2-user"
+  else if (ami.indexOf("CoreOS") > -1)
+    return "core"
 
-  if (options['always_override_user'])
-    user = default_user
-
-  if (user.length)
-    return user + "@"
-  else
-    return ""
+  return options["ssh_user"]
 }
 
 function get_windows_user() {
