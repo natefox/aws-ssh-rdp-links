@@ -70,6 +70,7 @@ function go() {
   add_to_element(get_selector(4, 2)) // IPv6 IPs
   add_to_element(get_selector(5, 2)) // Private DNS
   add_to_element(get_selector(6, 2)) // Private IPs
+  add_to_element(get_selector(7, 2)) // Secondary private IPs
 
   // Top bar "Public DNS" / "Private IP"
   var instance = document.querySelector("span[style^='padding-left: 5px;']")
@@ -94,6 +95,10 @@ function add_to_element(el) {
   else if (text.endsWith("*")) {
     // remove * from EIP
     text = text.substr(0, text.length-1)
+  }
+  else if (text.indexOf(",") != -1) {
+    // multiple Secondary private IPs; only use the first one
+    text = text.substr(0, text.indexOf(","))
   }
 
   // put IPv6 inside []
