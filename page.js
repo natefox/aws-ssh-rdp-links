@@ -7,7 +7,6 @@ var default_options = {
 
 var options = {}
 function get_options() {
-  if (!window.location.hash.startsWith("#Instances")) return;
   chrome.storage.sync.get(default_options, function(items){
     options = items
     window.setTimeout(function(){
@@ -30,6 +29,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 function go() {
+  if (!window.location.hash.startsWith("#Instances:")) return
+
   private_dns = get_selector(4,1);
   private_ip = get_selector(5,1);
 
