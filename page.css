@@ -9,6 +9,6 @@
 }
 
 /* This lets you single-click an element and all the contents will be selected to allow for very easy copy */
-#detailsInstanceId, #detailsPublicDNS, td .awssshrdp-element {
+#detailsInstanceId, td .awssshrdp-element {
   user-select: all;
 }

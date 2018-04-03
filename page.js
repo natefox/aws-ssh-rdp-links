@@ -65,13 +65,7 @@ function go() {
     }
   }
 
-  // The Public DNS and Instance ID fields are special and have ids, probably because of the copy to clipboard button
-  var public_dns = document.getElementById("detailsPublicDNS")
-  if (public_dns) {
-    // not present on terminated instances
-    add_to_element(public_dns) // Public DNS (IPv4)
-  }
-
+  add_to_element(get_selector(2, 2)) // Public DNS (IPv4)
   add_to_element(get_selector(3, 2)) // IPv4 Public IP
   add_to_element(get_selector(4, 2)) // IPv6 IPs
   add_to_element(get_selector(5, 2)) // Private DNS
@@ -85,9 +79,8 @@ function go() {
 }
 
 function add_to_element(el) {
-  if (!el || el.querySelector(".awssshrdplink") || el.getElementsByTagName("a").length > 0) {
-    // e.g. IPv6 with more than one address, then it's a link saying just "2 IPs" (with a popup that shows the IPs on mouseover)
-    // this also stops us from adding the SSH link more than once
+  if (!el || el.querySelector(".awssshrdplink") || el.querySelector("a")) {
+    // do not add multiple times, or if there is any kind of link here (e.g. IPv6 with more than one address)
     return
   }
 
@@ -140,10 +133,7 @@ function add_to_element(el) {
   }
 
   el.classList.add("awssshrdp-element")
-  if (el.id == "detailsPublicDNS") {
-    el.parentNode.insertBefore(link, el.nextElementSibling)
-  }
-  else if (el.children.length > 1) {
+  if (el.children.length > 1) {
     // add link before the copy to clipboard button
     el.insertBefore(link, el.lastChild)
   }
