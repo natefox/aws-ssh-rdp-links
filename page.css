@@ -1,3 +1,14 @@
 .awssshrdplink {
   font-size: 0.8em;
 }
+
+/* The SSH link text is added this way to avoid it from being copied by the "copy to clipboard" button */
+.awssshrdplink::after {
+  margin-left: 2px;
+  content: attr(data-link-text);
+}
+
+/* This lets you single-click an element and all the contents will be selected to allow for very easy copy */
+#detailsInstanceId, #detailsPublicDNS, td .awssshrdp-element {
+  user-select: all;
+}

@@ -7,126 +7,156 @@ var default_options = {
 
 var options = {}
 function get_options() {
-  chrome.storage.sync.get(default_options, function(items){
+  chrome.storage.sync.get(default_options, function(items) {
     options = items
-    window.setTimeout(function(){
-      go()
-    }, 400)
   })
 }
 
 get_options()
-chrome.storage.onChanged.addListener(get_options)
+chrome.storage.onChanged.addListener(function() {
+  get_options()
+  // remove all links
+  var links = document.querySelectorAll(".awssshrdplink")
+  for (var i=0; i < links.length; i++) {
+    links[i].parentNode.removeChild(links[i])
+  }
+  // add new links
+  window.setTimeout(go, 10)
+})
 
-// I really want something like this!
-// http://stackoverflow.com/a/3597640/517606
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(get_options, 4000);
-  $(document).click(function(){
-    go()
-  })
-});
+// poll at a high frequency until the "detailsPublicDNS" element has loaded
+// the instance details have finished loaded when this element appears
+// after this, rely on the click and keyup events below to add new SSH links when the selection changes
+var load_timer = setInterval(function() {
+  if (document.getElementById("detailsPublicDNS")) {
+    clearInterval(load_timer)
+    window.setTimeout(function() {
+      go()
+    }, 1000)
+  }
+}, 100)
 
+document.addEventListener("click", function() {
+  setTimeout(go, 500)
+})
+document.addEventListener("keyup", function() {
+  setTimeout(go, 1000)
+})
+
+function get_selector(row, col) {
+  // nth-child is 1-indexed!
+  return document.querySelector(`.gwt-TabLayoutPanelContent table > tbody tr:nth-child(${row}) > td:nth-child(${col}) div:nth-child(2)`)
+}
 
 function go() {
   if (!window.location.hash.startsWith("#Instances:")) return
 
-  private_dns = get_selector(4,1);
-  private_ip = get_selector(5,1);
-
-  public_dns = get_selector(1,1);
-  public_ip = get_selector(2,1);
-
-  ipv6_ip = get_selector(3,1);
-
-  elastic_ips = get_selector(4,0);
-  elastic_ips.find("li").each(function(i, eip) {
-    add_to_field($(eip))
-  });
-
-  top_row = $("div.HOB span:eq(2)")
-
-  add_to_field(private_ip)
-  add_to_field(public_ip)
-
-  add_to_field(ipv6_ip)
-
-  add_to_field(private_dns)
-  add_to_field(public_dns)
-  add_to_field(top_row, true)
-}
-
-function add_to_field(fld, is_top_row = false) {
-  if (fld.find("a").length > 0) {
-    // e.g. IPv6 with more than one address, then it's a link saying just "2 IPs" (with a popup that shows the IPs on mouseover)
+  var active_tab = document.querySelector(".gwt-TabLayoutPanelContent > div:not([aria-hidden])")
+  if (!active_tab || active_tab.children.length == 0 || active_tab.children[0].tagName == "UL") {
+    // multiple instances are selected
     return
   }
 
-  field_text = (is_top_row)
-    // grab last item via reverse->first item
-    ? fld.contents().first().text().split(" ").reverse()[0]
-    : fld.contents().first().text()
+  var elastic_ips = get_selector(5, 1)
+  if (elastic_ips) {
+    var list_items = elastic_ips.getElementsByTagName("li")
+    for (var i=0; i < list_items.length; i++) {
+      add_to_element(list_items[i])
+    }
+  }
 
-  // remove * from EIP
-  if (field_text.endsWith("*")) {
-    field_text = field_text.substr(0, field_text.length-1);
+  // The Public DNS and Instance ID fields are special and have ids, probably because of the copy to clipboard button
+  var public_dns = document.getElementById("detailsPublicDNS")
+  if (public_dns) {
+    // not present on terminated instances
+    add_to_element(public_dns) // Public DNS (IPv4)
+  }
+
+  add_to_element(get_selector(3, 2)) // IPv4 Public IP
+  add_to_element(get_selector(4, 2)) // IPv6 IPs
+  add_to_element(get_selector(5, 2)) // Private DNS
+  add_to_element(get_selector(6, 2)) // Private IPs
+
+  // Top bar "Public DNS" / "Private IP"
+  var instance = document.querySelector("span[style^='padding-left: 5px;']")
+  if (instance) {
+    add_to_element(instance.parentNode.lastChild)
+  }
+}
+
+function add_to_element(el) {
+  if (!el || el.querySelector(".awssshrdplink") || el.getElementsByTagName("a").length > 0) {
+    // e.g. IPv6 with more than one address, then it's a link saying just "2 IPs" (with a popup that shows the IPs on mouseover)
+    // this also stops us from adding the SSH link more than once
+    return
+  }
+
+  var text = el.textContent.trim()
+  if (text.startsWith("Private IP: ")) {
+    text = text.substring("Private IP: ".length)
+  }
+  else if (text.startsWith("Public DNS: ")) {
+    text = text.substring("Public DNS: ".length)
+  }
+  else if (text.endsWith("*")) {
+    // remove * from EIP
+    text = text.substr(0, text.length-1)
   }
 
   // put IPv6 inside []
-  if (field_text.indexOf(":") != -1) {
-    field_text = `[${field_text}]`;
+  if (text.indexOf(":") != -1) {
+    text = `[${text}]`
   }
 
-  if (field_text.indexOf("-") == 0 || field_text.trim().length == 0)
+  if (text.indexOf("-") == 0 || text.trim() == "") {
     return
-
-  span = ($("span.awssshrdplink", fld).length)
-          ? $("span.awssshrdplink", fld).empty()
-          : $("<span />", {class: "awssshrdplink"})
-
-  platform = get_selector(9,0).text();
-
-  str_to_add = (platform == "windows")
-              ? create_rdp(field_text)
-              : create_ssh(field_text)
-
-  span.append(str_to_add)
-  fld.append(span)
-}
-
-function create_ssh(host) {
-  var user = get_ssh_user()
-  href = $("<a />", {
-    href: "ssh://"+(user?`${user}@`:"")+host,
-    text: "SSH",
-  })
-  return href
-}
-
-function create_rdp(host) {
-  user = get_windows_user()
-
-  if (options['rdp_style'] == "MS") {
-    query_string_opts = []
-    if (user.length > 0) query_string_opts.push("username=s:"+user)
-    query_string_opts.push("full%20address=s:"+host+":3389")
-
-    query_string = query_string_opts.join("&")
-    href = $("<a />", {href: "rdp://"+query_string, text: "RDP"})
-  }
-  else if (options['rdp_style'] == "CoRD") {
-    user_at = (user.length > 0) ? user+"@" : ""
-    href = $("<a />", {href: "rdp://"+user_at+host , text: "RDP"})
   }
 
-  return href
+  var link = document.createElement("a")
+  link.className = "awssshrdplink"
+
+  var platform = get_selector(10, 1)
+  if (platform.textContent == "windows") {
+    link.setAttribute("data-link-text", "RDP")
+    var user = options["rdp_user"]
+
+    if (options["rdp_style"] == "MS") {
+      var query_string_opts = []
+      if (user != "") {
+        query_string_opts.push("username=s:"+user)
+      }
+      query_string_opts.push("full%20address=s:"+text+":3389")
+      var query_string = query_string_opts.join("&")
+      link.href = "rdp://"+query_string
+    }
+    else if (options["rdp_style"] == "CoRD") {
+      link.href = "rdp://"+(user?`${user}@`:"")+text
+    }
+  }
+  else {
+    link.setAttribute("data-link-text", "SSH")
+    var user = get_ssh_user()
+    link.href = "ssh://"+(user?`${user}@`:"")+text
+  }
+
+  el.classList.add("awssshrdp-element")
+  if (el.id == "detailsPublicDNS") {
+    el.parentNode.insertBefore(link, el.nextElementSibling)
+  }
+  else if (el.children.length > 1) {
+    // add link before the copy to clipboard button
+    el.insertBefore(link, el.lastChild)
+  }
+  else {
+    el.appendChild(link)
+  }
 }
 
 function get_ssh_user() {
   if (options["always_override_user"])
     return options["ssh_user"]
 
-  var ami = get_selector(8,0).text()
+  var ami = get_selector(9, 1)
   if (!ami)
     return options["ssh_user"]
 
@@ -143,13 +173,4 @@ function get_ssh_user() {
     return "core"
 
   return options["ssh_user"]
-}
-
-function get_windows_user() {
-  user = options['rdp_user']
-  return user
-}
-
-function get_selector(row,div) {
-  return $(`.gwt-TabLayoutPanelContent table > tbody tr:eq(${row}) div > div > div:eq(${div*2+1})`)
 }
