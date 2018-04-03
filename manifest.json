@@ -9,8 +9,7 @@
         "https://*.console.aws.amazon.com/ec2/*"
       ],
       "js": [
-        "page.js",
-        "jquery-2.2.2.min.js"
+        "page.js"
       ],
       "css": [
         "page.css"
