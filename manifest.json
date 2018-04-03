@@ -6,7 +6,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*.console.aws.amazon.com/ec2/v2/*"
+        "https://*.console.aws.amazon.com/ec2/*"
       ],
       "js": [
         "page.js",
