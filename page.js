@@ -123,7 +123,8 @@ function add_to_element(el) {
   link.className = "awssshrdplink"
 
   var platform = get_selector(10, 1)
-  if (platform.textContent == "windows") {
+  platform = (platform ? platform.textContent : "")
+  if (platform == "windows") {
     link.setAttribute("data-link-text", "RDP")
     var user = options["rdp_user"]
 
