@@ -72,7 +72,7 @@ function go() {
   add_to_element(get_selector(6, 2)) // Private IPs
   add_to_element(get_selector(7, 2)) // Secondary private IPs
 
-  // Top bar "Public DNS" / "Private IP"
+  // Top bar "Public DNS" / "Private IP" / "Elastic IP"
   var instance = document.querySelector("span[style^='padding-left: 5px;']")
   if (instance) {
     add_to_element(instance.parentNode.lastChild)
@@ -91,6 +91,9 @@ function add_to_element(el) {
   }
   else if (text.startsWith("Public DNS: ")) {
     text = text.substring("Public DNS: ".length)
+  }
+  else if (text.startsWith("Elastic IP: ")) {
+    text = text.substring("Elastic IP: ".length)
   }
   else if (text.endsWith("*")) {
     // remove * from EIP
