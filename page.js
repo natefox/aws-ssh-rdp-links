@@ -80,12 +80,18 @@ function go() {
 }
 
 function add_to_element(el) {
-  if (!el || el.querySelector(".awssshrdplink") || el.querySelector("a")) {
-    // do not add multiple times, or if there is any kind of link here (e.g. IPv6 with more than one address)
+  if (!el || el.querySelector(".awssshrdplink")) {
+    // do not add multiple times
     return
   }
 
   var text = el.textContent.trim()
+
+  if (text.endsWith(" IPs")) {
+    // instances with multiple IPv6 addresses have a link that brings up a popup with the list of addresses ("2 IPs")
+    return
+  }
+
   if (text.startsWith("Private IP: ")) {
     text = text.substring("Private IP: ".length)
   }
