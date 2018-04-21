@@ -176,6 +176,8 @@ function get_ssh_user() {
     return "ec2-user"
   else if (ami.includes("CoreOS"))
     return "core"
+  else if (ami.includes("VyOS"))
+    return "vyos"
 
   return options["ssh_user"]
 }
