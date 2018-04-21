@@ -105,17 +105,17 @@ function add_to_element(el) {
     // remove * from EIP
     text = text.substr(0, text.length-1)
   }
-  else if (text.indexOf(",") != -1) {
+  else if (text.includes(",")) {
     // multiple Secondary private IPs; only use the first one
     text = text.substr(0, text.indexOf(","))
   }
 
   // put IPv6 inside []
-  if (text.indexOf(":") != -1) {
+  if (text.includes(":")) {
     text = `[${text}]`
   }
 
-  if (text.indexOf("-") == 0 || text.trim() == "") {
+  if (text[0] == "-" || text.trim() == "") {
     return
   }
 
@@ -166,15 +166,15 @@ function get_ssh_user() {
     return options["ssh_user"]
 
   ami = ami.textContent
-  if (ami.indexOf("ubuntu") > -1)
+  if (ami.includes("ubuntu"))
     return "ubuntu"
-  else if (ami.indexOf("amzn") > -1)
+  else if (ami.includes("amzn"))
     return "ec2-user"
-  else if (ami.indexOf("RHEL") > -1)
+  else if (ami.includes("RHEL"))
     return "ec2-user"
-  else if (ami.indexOf("suse-sles") > -1)
+  else if (ami.includes("suse-sles"))
     return "ec2-user"
-  else if (ami.indexOf("CoreOS") > -1)
+  else if (ami.includes("CoreOS"))
     return "core"
 
   return options["ssh_user"]
