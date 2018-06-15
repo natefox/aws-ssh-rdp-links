@@ -1,153 +1,183 @@
-var saved_data = {}
-var default_data = {
+var default_options = {
+  ssh_user: "ec2-user",
   always_override_user: false,
-  ipv6_brackets: false,
-  rdp_style: "MS",
   rdp_user: "Administrator",
-  ssh_user: "ec2-user"
+  rdp_style: "MS",
 }
 
-chrome.storage.onChanged.addListener(function(){
-    get_storage();
+var options = {}
+function get_options() {
+  chrome.storage.sync.get(default_options, function(items) {
+    options = items
+  })
+}
+
+get_options()
+chrome.storage.onChanged.addListener(function() {
+  get_options()
+  // remove all links
+  var links = document.querySelectorAll(".awssshrdplink")
+  for (var i=0; i < links.length; i++) {
+    links[i].parentNode.removeChild(links[i])
+  }
+  // add new links
+  window.setTimeout(go, 10)
 })
 
-// I really want something like this!
-// http://stackoverflow.com/a/3597640/517606
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(get_storage, 4000);
-    $(document).click(function(){
-        get_storage();
-    })
-});
+// poll at a high frequency until the "detailsPublicDNS" element has loaded
+// the instance details have finished loaded when this element appears
+// after this, rely on the click and keyup events below to add new SSH links when the selection changes
+var load_timer = setInterval(function() {
+  if (document.getElementById("detailsPublicDNS")) {
+    clearInterval(load_timer)
+    window.setTimeout(function() {
+      go()
+    }, 1000)
+  }
+}, 100)
 
+document.addEventListener("click", function() {
+  setTimeout(go, 500)
+})
+document.addEventListener("keyup", function() {
+  setTimeout(go, 1000)
+})
 
-function get_storage() {
-    if (!window.location.hash.startsWith("#Instances")) return;
-    chrome.storage.sync.get(default_data, function(items){
-        saved_data = items
-        window.setTimeout(function(){
-            go();
-        }, 400);
-    })
+function get_selector(row, col) {
+  // nth-child is 1-indexed!
+  return document.querySelector(`.gwt-TabLayoutPanelContent table > tbody tr:nth-child(${row}) > td:nth-child(${col}) div:nth-child(2)`)
 }
 
 function go() {
-    private_dns = get_selector(4,1);
-    private_ip = get_selector(5,1);
+  if (!window.location.hash.startsWith("#Instances:")) return
 
-    public_dns = get_selector(1,1);
-    public_ip = get_selector(2,1);
+  var active_tab = document.querySelector(".gwt-TabLayoutPanelContent > div:not([aria-hidden])")
+  if (!active_tab || active_tab.children.length == 0 || active_tab.children[0].tagName == "UL") {
+    // multiple instances are selected
+    return
+  }
 
-    ipv6_ip = get_selector(3,1);
+  var elastic_ips = get_selector(5, 1)
+  if (elastic_ips) {
+    var list_items = elastic_ips.getElementsByTagName("li")
+    for (var i=0; i < list_items.length; i++) {
+      add_to_element(list_items[i])
+    }
+  }
 
-    elastic_ips = get_selector(4,0);
-    elastic_ips.find("li").each(function(i, eip) {
-      add_to_field($(eip))
-    });
+  add_to_element(get_selector(2, 2)) // Public DNS (IPv4)
+  add_to_element(get_selector(3, 2)) // IPv4 Public IP
+  add_to_element(get_selector(4, 2)) // IPv6 IPs
+  add_to_element(get_selector(5, 2)) // Private DNS
+  add_to_element(get_selector(6, 2)) // Private IPs
+  add_to_element(get_selector(7, 2)) // Secondary private IPs
 
-    top_row = $("div.HOB span:eq(2)")
-
-    add_to_field(private_ip)
-    add_to_field(public_ip)
-
-    add_to_field(ipv6_ip)
-
-    add_to_field(private_dns)
-    add_to_field(public_dns)
-    add_to_field(top_row, true)
+  // Top bar "Public DNS" / "Private IP" / "Elastic IP"
+  var instance = document.querySelector("span[style^='padding-left: 5px;']")
+  if (instance) {
+    add_to_element(instance.parentNode.lastChild)
+  }
 }
 
-function add_to_field(fld, is_top_row = false) {
-    if (fld.find("a").length > 0) {
-      // e.g. IPv6 with more than one address, then it's a link saying just "2 IPs" (with a popup that shows the IPs on mouseover)
-      return
-    }
+function add_to_element(el) {
+  if (!el || el.querySelector(".awssshrdplink")) {
+    // do not add multiple times
+    return
+  }
 
-    field_text = (is_top_row)
-        // grab last item via reverse->first item
-        ? fld.contents().first().text().split(" ").reverse()[0]
-        : fld.contents().first().text()
+  var text = el.textContent.trim()
 
+  if (text.endsWith(" IPs")) {
+    // instances with multiple IPv6 addresses have a link that brings up a popup with the list of addresses ("2 IPs")
+    return
+  }
+
+  if (text.startsWith("Private IP: ")) {
+    text = text.substring("Private IP: ".length)
+  }
+  else if (text.startsWith("Public DNS: ")) {
+    text = text.substring("Public DNS: ".length)
+  }
+  else if (text.startsWith("Elastic IP: ")) {
+    text = text.substring("Elastic IP: ".length)
+  }
+  else if (text.endsWith("*")) {
     // remove * from EIP
-    if (field_text.endsWith("*")) {
-      field_text = field_text.substr(0, field_text.length-1);
+    text = text.substr(0, text.length-1)
+  }
+  else if (text.includes(",")) {
+    // multiple Secondary private IPs; only use the first one
+    text = text.substr(0, text.indexOf(","))
+  }
+
+  // put IPv6 inside []
+  if (text.includes(":")) {
+    text = `[${text}]`
+  }
+
+  if (text[0] == "-" || text.trim() == "") {
+    return
+  }
+
+  var link = document.createElement("a")
+  link.className = "awssshrdplink"
+
+  var platform = get_selector(10, 1)
+  platform = (platform ? platform.textContent : "")
+  if (platform == "windows") {
+    link.setAttribute("data-link-text", "RDP")
+    var user = options["rdp_user"]
+
+    if (options["rdp_style"] == "MS") {
+      var query_string_opts = []
+      if (user != "") {
+        query_string_opts.push("username=s:"+user)
+      }
+      query_string_opts.push("full%20address=s:"+text+":3389")
+      var query_string = query_string_opts.join("&")
+      link.href = "rdp://"+query_string
     }
-
-    // put IPv6 inside []
-    if (field_text.indexOf(":") != -1) {
-      field_text = `[${field_text}]`;
+    else if (options["rdp_style"] == "CoRD") {
+      link.href = "rdp://"+(user?`${user}@`:"")+text
     }
+  }
+  else {
+    link.setAttribute("data-link-text", "SSH")
+    var user = get_ssh_user()
+    link.href = "ssh://"+(user?`${user}@`:"")+text
+  }
 
-    if (field_text.indexOf("-") == 0 || field_text.trim().length == 0)
-        return
-
-    span = ($("span.awssshrdplink", fld).length)
-            ? $("span.awssshrdplink", fld).empty()
-            : $("<span />", {class: "awssshrdplink"})
-
-    platform = get_selector(9,0).text();
-
-    str_to_add = (platform == "windows")
-                ? create_rdp(field_text)
-                : create_ssh(field_text)
-
-    span.append(str_to_add)
-    fld.append(span)
-}
-
-function create_ssh(host) {
-    user = get_ssh_user()
-    href = $("<a />", {href: "ssh://"+user+host , text: "SSH"})
-    return href
-}
-
-function create_rdp(host) {
-    user = get_windows_user()
-
-    if (saved_data['rdp_style'] == "MS") {
-        query_string_opts = []
-        if (user.length > 0) query_string_opts.push("username=s:"+user)
-        query_string_opts.push("full%20address=s:"+host+":3389")
-
-        query_string = query_string_opts.join("&")
-        href = $("<a />", {href: "rdp://"+query_string, text: "RDP"})
-    } else if (saved_data['rdp_style'] == "CoRD") {
-        user_at = (user.length > 0) ? user+"@" : ""
-        href = $("<a />", {href: "rdp://"+user_at+host , text: "RDP"})
-    }
-
-    return href
+  el.classList.add("awssshrdp-element")
+  if (el.children.length > 1) {
+    // add link before the copy to clipboard button
+    el.insertBefore(link, el.lastChild)
+  }
+  else {
+    el.appendChild(link)
+  }
 }
 
 function get_ssh_user() {
-    default_user = saved_data['ssh_user']
+  if (options["always_override_user"])
+    return options["ssh_user"]
 
-    ami = get_selector(8,0).text();
-    if (ami.indexOf("ubuntu") > -1)
-        user = "ubuntu"
-    else if (ami.indexOf("amzn") > -1)
-        user = "ec2-user"
-    else if (ami.indexOf("RHEL") > -1)
-        user = "ec2-user"
-    else if (ami.indexOf("suse-sles") > -1)
-        user = "ec2-user"
-    else
-        user = default_user
+  var ami = get_selector(9, 1)
+  if (!ami)
+    return options["ssh_user"]
 
-    if (saved_data['always_override_user'])
-        user = default_user
+  ami = ami.textContent
+  if (ami.includes("ubuntu"))
+    return "ubuntu"
+  else if (ami.includes("amzn"))
+    return "ec2-user"
+  else if (ami.includes("RHEL"))
+    return "ec2-user"
+  else if (ami.includes("suse-sles"))
+    return "ec2-user"
+  else if (ami.includes("CoreOS"))
+    return "core"
+  else if (ami.includes("VyOS"))
+    return "vyos"
 
-    if (user.length)
-        return user + "@"
-    else
-        return ""
-}
-
-function get_windows_user() {
-    user = saved_data['rdp_user']
-    return user
-}
-
-function get_selector(row,div) {
-    return $(`.gwt-TabLayoutPanelContent table > tbody tr:eq(${row}) div > div > div:eq(${div*2+1})`)
+  return options["ssh_user"]
 }
