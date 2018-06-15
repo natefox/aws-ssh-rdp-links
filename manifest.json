@@ -3,7 +3,7 @@
   "name": "AWS SSH RDP Links",
   "description": "Adds SSH and RDP links to the AWS Console",
   "homepage_url": "https://github.com/natefox/aws-ssh-rdp-links",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "content_scripts": [
     {
       "matches": ["https://*.console.aws.amazon.com/ec2/*"],
