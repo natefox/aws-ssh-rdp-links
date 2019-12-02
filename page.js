@@ -64,7 +64,7 @@ function go() {
       add_to_element(list_items[i])
     }
   }
-
+  add_to_element(get_selector(2, 1)) // Instance ID
   add_to_element(get_selector(2, 2)) // Public DNS (IPv4)
   add_to_element(get_selector(3, 2)) // IPv4 Public IP
   add_to_element(get_selector(4, 2)) // IPv6 IPs
@@ -142,9 +142,24 @@ function add_to_element(el) {
     }
   }
   else {
-    link.setAttribute("data-link-text", "SSH")
-    var user = get_ssh_user()
-    link.href = "ssh://"+(user?`${user}@`:"")+text
+    var instance_id = get_selector(2, 1)
+    instance_id = (instance_id ? instance_id.textContent : "")
+
+    var avail_zone = get_selector(6, 1);
+    avail_zone = (avail_zone ? avail_zone.textContent : "")
+
+    aws_region = avail_zone.substring(0, avail_zone.length - 1)
+
+    if ( get_selector(2, 1).textContent == text ) {
+        link.setAttribute("data-link-text", "SSM")
+        link.setAttribute('target','_blank')
+        link.href = "https://console.aws.amazon.com/systems-manager/session-manager/"+text+"?region="+aws_region
+    }
+    else {
+        link.setAttribute("data-link-text", "SSH")
+        var user = get_ssh_user()
+        link.href = "ssh://"+(user?`${user}@`:"")+text
+    }
   }
 
   el.classList.add("awssshrdp-element")

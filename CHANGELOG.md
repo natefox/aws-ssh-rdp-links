@@ -1,4 +1,8 @@
 # Changelog
+
+## 0.1.13 - 2019-11-02
+- Add SSM links to instance id
+
 ## 0.1.11 - 2017-09-24
 - Force IPv6 address into brackets
 
