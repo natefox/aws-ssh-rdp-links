@@ -145,7 +145,7 @@ function add_to_element(el) {
     var instance_id = get_selector(2, 1)
     instance_id = (instance_id ? instance_id.textContent : "")
 
-    var avail_zone = get_selector(6, 1);
+    var avail_zone = get_selector(6, 2);
     avail_zone = (avail_zone ? avail_zone.textContent : "")
 
     aws_region = avail_zone.substring(0, avail_zone.length - 1)
