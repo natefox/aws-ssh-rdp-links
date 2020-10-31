@@ -1,4 +1,9 @@
-# AWS SSH and RDP Links
+# DEPRECATION NOTICE
+This software is deprecated. I don't have the time to keep up on AWS' console changes and frankly this needs a vastly different approach (so it's far more resilient to console updates).
+
+---
+
+## AWS SSH and RDP Links
 https://chrome.google.com/webstore/detail/aws-ssh-rdp-links/hgholhakdlbjengncomcankfpfkjdpdh
 
 ### Adds SSH or RDP links to your AWS console
